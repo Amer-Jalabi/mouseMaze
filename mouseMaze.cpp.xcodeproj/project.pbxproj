@@ -6,10 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXFileReference section */
+		4B65E9042E4E3F2E00461661 /* mouseMaze.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mouseMaze.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		4B65E8FD2E4E3F2800461661 = {
 			isa = PBXGroup;
 			children = (
+				4B65E9042E4E3F2E00461661 /* mouseMaze.cpp */,
 			);
 			sourceTree = "<group>";
 		};
