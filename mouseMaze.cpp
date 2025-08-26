@@ -2,7 +2,7 @@
 
 #include <iostream> // For input and output
 #include <stack> // For stack
-#include <utility> // For pair
+//#include <utility> // For pair
 
 #define f 'f' // Barriers
 #define t 't' // Allowed spaces
@@ -48,7 +48,7 @@ Point initMaze() {
 int rec = 0;
 
 // !*** This function finds the path to the cheese (checks in this order: down, right, left, up) ***!
-bool findPath(Point currLoc, Point cheese, int prevMove) {
+Point findPath(Point currLoc, Point cheese) {
     clog << "Entered findPath " << rec++ << endl;
     int x = currLoc.x;
     int y = currLoc.y;
@@ -56,51 +56,47 @@ bool findPath(Point currLoc, Point cheese, int prevMove) {
     bool moved = false;
     int toMoveTo[2] = { -1, -1 };
 
-    clog << "{x, y} = " << x << ", " << y << "\nprevMove: " << prevMove << endl;
+    clog << "{x, y} = " << x << ", " << y << endl;
 
     // If current location is the cheese then return true
     if (cheese.x == x && cheese.y == y) {
         maze[x][y] = 'c';
-        return true;
+        return currLoc;
     }
 
     // !*** Don't forget cannot go back to previous move ***!
-    if (maze[x + 1][y] == t && prevMove != 3) { // Check down: 0
+    if (maze[x + 1][y] == t) { // Check down: 0
         clog << "Entered down" << endl;
         possibleMoves++; // Add 1
-        prevMove = 0;
         // Update to move to position
         toMoveTo[0] = x + 1; // X
         toMoveTo[1] = y; // Y
         moved = true;
     }
-    if (maze[x][y + 1] == t && prevMove != 2) { // Check right: 1
+    if (maze[x][y + 1] == t) { // Check right: 1
         clog << "Entered right" << endl;
         possibleMoves++; // Add 1
         if (!moved) {
-            prevMove = 1;
             // Update to move to position
             toMoveTo[0] = x; // X
             toMoveTo[1] = y + 1; // Y
             moved = true;
         }
     }
-    if (maze[x][y - 1] == t && prevMove != 1) { // Check left: 2
+    if (maze[x][y - 1] == t) { // Check left: 2
         clog << "Entered left" << endl;
         possibleMoves++; // Add 1
         if (!moved) {
-            prevMove = 2;
             // Update to move to position
             toMoveTo[0] = x; // X
             toMoveTo[1] = y - 1; // Y
             moved = true;
         }
     }
-    if (maze[x - 1][y] == t && prevMove != 0) { // Check up: 3
+    if (maze[x - 1][y] == t) { // Check up: 3
         clog << "Entered up" << endl;
         possibleMoves++; // Add 1
         if (!moved) {
-            prevMove = 3;
             // Update to move to position
             toMoveTo[0] = x - 1; // X
             toMoveTo[1] = y; // Y
@@ -116,6 +112,9 @@ bool findPath(Point currLoc, Point cheese, int prevMove) {
     }
 
     if (possibleMoves == 0) { // Reached a dead end
+        // If cheese is not found at all
+        if(multipath.empty()) return Point {-1, -1};
+        
         Point popped = multipath.top();
 
         // Go back to the last multipath
@@ -138,18 +137,25 @@ bool findPath(Point currLoc, Point cheese, int prevMove) {
     clog << "Moved to " << currLoc.x << ", " << currLoc.y << endl;
 
     // Recurse to the next location <-- idk if thats how you write it ;)
-    return findPath(currLoc, cheese, prevMove);
+    return findPath(currLoc, cheese);
 }
 
 int main() {
     // STILL HAVENT PUSHED THE PATH TO THE STACK TO RECORD THE PATHWAY. (only pushed the init pos)
-    int prevMove = 0; // 0 for down, 1 for right, 2 for left, 3 for up.
+    // While loop for popping until i go back to stack pushed position so end pathway is correct one maybe
+    // OR we could have the whole path even if a path reached a dead end
     Point cheese { 1, 4 };
-
+    
     Point init = initMaze();
+    
+    // To check if the cheese has been found or not
+    Point foundCheese = findPath(init, cheese); //(preMove) 0 for down, 1 for right, 2 for left, 3 for up. REMOVE PREMOVE
+    bool found;
+    if(foundCheese.x == -1 && foundCheese.y == -1) found = true;
+    else found = false;
 
-    if (findPath(init, cheese, 0))
-        cout << "Mouse found the cheese!" << endl;
+    if (found)
+        cout << "Mouse found the cheese!\nCheese is at: " << foundCheese.x << ", " << foundCheese.y << endl;
     else
         cout << "Mouse did not find the cheese" << endl;
 
