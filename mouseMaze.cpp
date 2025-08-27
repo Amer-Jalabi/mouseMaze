@@ -4,18 +4,28 @@
 #include <stack> // For stack
 //#include <utility> // For pair
 
-#define f 'f' // Barriers
-#define t 't' // Allowed spaces
+# define f 'f' // Barriers
+# define t 't' // Allowed spaces
+# define SIZE_X 7
+# define SIZE_Y 8
 
 using namespace std;
 
-char maze[6][6] = { f, f, f, f, f, f,\
-                    f, t, f, t, t, f,\
-                    f, t, f, t, f, f,\
-                    f, t, t, t, t, f,\
-                    f, t, t, f, t, f,\
-                    f, f, f, f, f, f };
+// Original Maze
+//char maze[6][6] = { f, f, f, f, f, f,\
+//                    f, t, f, t, t, f,\
+//                    f, t, f, t, f, f,\
+//                    f, t, t, t, t, f,\
+//                    f, t, t, f, t, f,\
+//                    f, f, f, f, f, f };
 
+char maze[SIZE_X][SIZE_Y] = { f, f, f, f, f, f, f, f,\
+                              f, t, t, t, f, t, t, f,\
+                              f, f, f, t, f, t, f, f,\
+                              f, t, t, t, f, t, t, f,\
+                              f, t, t, t, t, f, t, f,\
+                              f, f, f, f, t, t, t, f,\
+                              f, f, f, f, f, f, f, f };
 
 struct Point {
     int x, y;
@@ -23,15 +33,15 @@ struct Point {
 
 //stack<int[2]> multipathes; // I do not think this works...
 //stack<pair<int, int>> multipath;
-//stack<pair<int, int>> currentLocation;
+//stack<pair<int, int>> currentPathway;
 
 stack<Point> multipath;
-stack<Point> currentLocation;
+stack<Point> currentPathway;
 
 void printMaze() {
-    cout << "\n  --MAZE--\n" << endl;
+    cout << "\n";
     for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 6; j++) {
+        for (int j = 0; j < 8; j++) {
             cout << ' ' << maze[i][j];
         }
         cout << endl;
@@ -39,20 +49,12 @@ void printMaze() {
     cout << endl;
 }
 
-Point initMaze() {
-    Point init { 1, 1 };
-    currentLocation.push({init.x, init.y}); // Push first initial position of the mouse
-    return init;
-}
-
 int rec = 0;
 
 // !*** This function finds the path to the cheese (checks in this order: down, right, left, up) ***!
 Point findPath(Point currLoc, Point cheese) {
     clog << "Entered findPath " << rec++ << endl;
-    int x = currLoc.x;
-    int y = currLoc.y;
-    int possibleMoves = 0;
+    int x = currLoc.x, y = currLoc.y, possibleMoves = 0;
     bool moved = false;
     int toMoveTo[2] = { -1, -1 };
 
@@ -60,11 +62,11 @@ Point findPath(Point currLoc, Point cheese) {
 
     // If current location is the cheese then return true
     if (cheese.x == x && cheese.y == y) {
+        // currentPathway.push({ x, y }); // Uncomment if you do not want to show the symbol c when priting pathway
         maze[x][y] = 'c';
         return currLoc;
     }
 
-    // !*** Don't forget cannot go back to previous move ***!
     if (maze[x + 1][y] == t) { // Check down: 0
         clog << "Entered down" << endl;
         possibleMoves++; // Add 1
@@ -106,17 +108,24 @@ Point findPath(Point currLoc, Point cheese) {
 
     // If there is a multipath
     if (possibleMoves >= 2) {
+        
         // Add current location to second stack
         multipath.push({ x, y });
         clog << "Pushed: " << x << ", " << y << " to multipath" << endl;
+        
+        // Move to toMoveTo
+        currLoc.x = toMoveTo[0];
+        currLoc.y = toMoveTo[1];
     }
-
-    if (possibleMoves == 0) { // Reached a dead end
+    else if (possibleMoves == 0) { // Reached a dead end
+        
         // If cheese is not found at all
-        if(multipath.empty()) return Point {-1, -1};
+        if(multipath.empty()) return Point { -1, -1 };
         
         Point popped = multipath.top();
 
+        // Pop currentPathway
+        
         // Go back to the last multipath
         currLoc.x = popped.x;
         currLoc.y = popped.y;
@@ -131,7 +140,9 @@ Point findPath(Point currLoc, Point cheese) {
         currLoc.x = toMoveTo[0];
         currLoc.y = toMoveTo[1];
     }
-    maze[x][y] = f; // Make current location f (a barrier) (anything wrong with making a multipath f?)
+    
+    maze[x][y] = '*'; // Make current location f (a barrier) (anything wrong with making a multipath f?)
+    currentPathway.push({ x, y });
    
     printMaze();
     clog << "Moved to " << currLoc.x << ", " << currLoc.y << endl;
@@ -140,26 +151,57 @@ Point findPath(Point currLoc, Point cheese) {
     return findPath(currLoc, cheese);
 }
 
-int main() {
-    // STILL HAVENT PUSHED THE PATH TO THE STACK TO RECORD THE PATHWAY. (only pushed the init pos)
-    // While loop for popping until i go back to stack pushed position so end pathway is correct one maybe
-    // OR we could have the whole path even if a path reached a dead end
-    Point cheese { 1, 4 };
+ void findOptimalPath() {
     
-    Point init = initMaze();
+}
+
+void printPathToCheese() {
+    cout << "Actual pathway to the cheese (o) :" << endl;
+    while(!currentPathway.empty()) {
+        Point popped = currentPathway.top();
+//        cout << popped.x << ", " << popped.y << "} {"; // To print each location of path
+        maze[popped.x][popped.y] = 'o';
+        currentPathway.pop();
+    }
+    printMaze();
+}
+
+int main() {
+    
+    // While loop for popping until I go back to stack pushed position so end pathway is correct one maybe
+    // OR we could have the whole path even if a path reached a dead end
+    
+    // Implement find (maybe with a seperate function) the most efficient path to the cheese
+    
+    // Add the ability to add any maze (add a checker that checks if the maze is legit (has 4 walls)
+    
+    Point cheese { 1, 6 };
+    
+    Point init { 1, 1 };
     
     // To check if the cheese has been found or not
-    Point foundCheese = findPath(init, cheese); //(preMove) 0 for down, 1 for right, 2 for left, 3 for up. REMOVE PREMOVE
+    Point foundCheese = findPath(init, cheese);
     bool found;
-    if(foundCheese.x == -1 && foundCheese.y == -1) found = true;
-    else found = false;
+    if(foundCheese.x == -1 && foundCheese.y == -1) found = false;
+    else found = true;
 
-    if (found)
+    if (found){
         cout << "Mouse found the cheese!\nCheese is at: " << foundCheese.x << ", " << foundCheese.y << endl;
-    else
+        
+        // Print maze with pathway the mouse took to find the cheese
+        cout << "Pathway taken by the mouse to find the cheese:" << endl;
+        printMaze();
+        
+        // Print maze with the pathway to the cheese (not necessarily the most optimal)
+        printPathToCheese();
+    }
+    else{
         cout << "Mouse did not find the cheese" << endl;
-
-    printMaze();
-
+        
+        // Print maze with pathway the mouse took to try to find the cheese
+        cout << "Pathway taken by the mouse to try to find the cheese:" << endl;
+        printMaze();
+    }
+    
     return 0;
 }
