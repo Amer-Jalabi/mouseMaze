@@ -39,11 +39,15 @@ stack<Point> multipath;
 stack<Point> currentPathway;
 
 void printMaze() {
+    cout << "\n\n  ";
+    for(int i = 0; i < SIZE_Y; i++) cout << " " << i; // To print the top numbers
     cout << "\n";
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < SIZE_X; i++) {
+        cout << " " << i; // To print the side numbers
+        for (int j = 0; j < SIZE_Y; j++) {
             cout << ' ' << maze[i][j];
         }
+        if(i+1 == SIZE_X/2) cout << "\t\tAny point on the grid is { top, side }";
         cout << endl;
     }
     cout << endl;
@@ -105,6 +109,10 @@ Point findPath(Point currLoc, Point cheese) {
             moved = true;
         }
     }
+    
+    maze[x][y] = '*'; // Make current location *
+    currentPathway.push({ x, y });
+    clog << "Pushed: " << x << ", " << y << " to currentPath" << endl;
 
     // If there is a multipath
     if (possibleMoves >= 2) {
@@ -124,12 +132,18 @@ Point findPath(Point currLoc, Point cheese) {
         
         Point popped = multipath.top();
 
-        // Pop currentPathway
         
         // Go back to the last multipath
         currLoc.x = popped.x;
         currLoc.y = popped.y;
         clog << "Popped multipath" << " " << x << ", " << y << endl;
+        
+        // Pop currentPathway back to the multipath
+        do{
+            popped = currentPathway.top();
+            cout << "Popped: " << popped.x << ", " << popped.y << endl;
+            currentPathway.pop();
+        } while(popped.x != currLoc.x || popped.y != currLoc.y);
 
         // Pop the last multipath (if there was more than 2 pathes it will be pushed back in
         // (IG I can maybe add possible pathes/moves to each portion with the Point struct)
@@ -140,9 +154,6 @@ Point findPath(Point currLoc, Point cheese) {
         currLoc.x = toMoveTo[0];
         currLoc.y = toMoveTo[1];
     }
-    
-    maze[x][y] = '*'; // Make current location f (a barrier) (anything wrong with making a multipath f?)
-    currentPathway.push({ x, y });
    
     printMaze();
     clog << "Moved to " << currLoc.x << ", " << currLoc.y << endl;
@@ -159,7 +170,7 @@ void printPathToCheese() {
     cout << "Actual pathway to the cheese (o) :" << endl;
     while(!currentPathway.empty()) {
         Point popped = currentPathway.top();
-//        cout << popped.x << ", " << popped.y << "} {"; // To print each location of path
+        cout << popped.x << ", " << popped.y << "} {"; // To print each location of path
         maze[popped.x][popped.y] = 'o';
         currentPathway.pop();
     }
@@ -175,7 +186,7 @@ int main() {
     
     // Add the ability to add any maze (add a checker that checks if the maze is legit (has 4 walls)
     
-    Point cheese { 1, 6 };
+    Point cheese { 3, 2 };
     
     Point init { 1, 1 };
     
