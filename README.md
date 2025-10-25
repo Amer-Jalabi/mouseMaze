@@ -1,6 +1,10 @@
 # mouseMaze
 
-Maze with a mouse starting at a position in the maze and finding the path to the cheese and finding the optimal path to the cheese.
+Mouse Maze
+
+## Description
+
+Maze with a mouse starting at a position in the maze and finding the path to the cheese using Depth-First Search and then finding the optimal path to the cheese using Breadth-First Search.
 
 ## Installation
 
